@@ -1,7 +1,5 @@
 package tutoring.ui;
 
-
-
 /**
  *A class that scrapes the Lehigh University web page for classes that are tutored @https://studentaffairs.lehigh.edu/content/courses-tutoring
  * @author Cameron Zurmuhl, Lafayette College '20
@@ -10,5 +8,7 @@ package tutoring.ui;
  * Github: https://github.com/20zurmca
  */
 public class WebScraper {
+    
+    
     
 }
