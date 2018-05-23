@@ -43,7 +43,8 @@ public class TestTutor {
     //
 
     @Test
-    public void testConnection() {
+    /**The purpose of this method is to test if we can obtain a suitable connection to Tutoring.db*/
+    public Statement testConnection() {
         Connection con = null;
         Statement s = null;
         try {
@@ -53,9 +54,14 @@ public class TestTutor {
         } catch (SQLException e) {
             e.printStackTrace();
            // System.exit(0);
-        }
-        assertFalse(con == null);
-        
+        }        
+        return s;
+    }
+    
+    public void testGetNumSections()
+    {
+      Statement s = testConnection();
+      //code...
     }
 
 }
