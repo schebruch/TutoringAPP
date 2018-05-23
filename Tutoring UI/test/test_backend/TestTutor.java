@@ -18,6 +18,9 @@ import java.sql.*;
  * @author scheb
  */
 public class TestTutor {
+    
+    private Statement s;
+    private Connection con;
 
     public TestTutor() {
     }
@@ -32,6 +35,13 @@ public class TestTutor {
 
     @Before
     public void setUp() {
+         try {
+            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
+            s = con.createStatement();
+            System.out.println("Connection successful");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } 
     }
 
     @After
@@ -44,24 +54,14 @@ public class TestTutor {
 
     @Test
     /**The purpose of this method is to test if we can obtain a suitable connection to Tutoring.db*/
-    public Statement testConnection() {
-        Connection con = null;
-        Statement s = null;
-        try {
-            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
-            s = con.createStatement();
-            System.out.println("Connection successful");
-        } catch (SQLException e) {
-            e.printStackTrace();
-           // System.exit(0);
-        }        
-        return s;
+    public void testConnection() {
+        assertTrue(con != null);
+        assertTrue(s != null); 
     }
     
     public void testGetNumSections()
     {
-      Statement s = testConnection();
-      //code...
+    
     }
 
 }
