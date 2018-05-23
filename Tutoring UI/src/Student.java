@@ -1,3 +1,5 @@
+package tutoring.ui;
+
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.sql.*;

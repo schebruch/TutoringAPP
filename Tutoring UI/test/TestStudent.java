@@ -1,3 +1,4 @@
+
 /*
  * To start a J-Unit test for your project: right click on source packages -->new --> JUnit test
  * To add more J-Unit tests for your other classes, right click on <default package> under Test Packages and add a new JUnit test
@@ -10,6 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import tutoring.ui.Student;
 
 /**
  *
