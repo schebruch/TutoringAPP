@@ -1,4 +1,4 @@
-package tutoring.ui;
+package tutoring;
 
 import java.util.Scanner;
 import java.util.ArrayList;

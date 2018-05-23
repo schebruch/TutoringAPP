@@ -1,4 +1,4 @@
-package tutoring.ui;
+package tutoring;
 
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -443,6 +443,7 @@ public class Tutor
     Statement s = null;
     try
     {
+      Class.forName("org.sqlite.JDBC");
       con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
       s = con.createStatement();
       System.out.println("Connection successful");
