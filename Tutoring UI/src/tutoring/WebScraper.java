@@ -32,7 +32,7 @@ public class WebScraper {
     {
         establishConnection();
         allCourses = new LinkedList<>();
-        
+        parsedCourses = new ArrayList<>();
         if(doc.title() != null){ //if connection is established
             loadStrings();
             parse();
@@ -58,9 +58,22 @@ public class WebScraper {
             return;
         }
         
-        
-        
-        
+        for(int i = 0; i < parsedCourses.size(); i++)
+        {
+            Course current = parsedCourses.get(i);
+            String checkForExistingDuplicate = "select* from CLASS where course_num = " + current.course_num + " and subj_name = '" + current.subj_name +"')";
+            try
+            {
+                ResultSet r = s.executeQuery(checkForExistingDuplicate);
+                if(!r.next()) //if there are no existing courses in the DB
+                {
+                    insertCourse(s, current.course_num, current.subj_name, current.class_name);
+                }
+            }catch(SQLException e)
+            {
+                System.out.println("Could not check for existing courses");
+            }
+        }
     }
     
      /**
@@ -148,8 +161,7 @@ public class WebScraper {
                 System.out.println(sb.toString());
                 allCourses.add(sb.toString());
             }
-        }
-       
+        }       
     }
      
     /**
@@ -185,20 +197,31 @@ public class WebScraper {
         
     }
     
+    private void insertCourse(Statement s, int course_num, String subj_name, String class_name)
+    {
+        String insertThisCourse = "insert into CLASS(course_num, subj_name, class_name) values(" + course_num + ", '" + subj_name + "', '" + class_name + "')";
+        try
+        {
+            s.executeUpdate(insertThisCourse);
+        }catch(SQLException e)
+        {
+            System.out.println("Insert failed");
+        }
+    }
     
     /**
      * Class represents a course from the Website
      */
     private static class Course {
-        int courseNum;     //course number
-        String courseName; //course name
-        String courseAbbr; //course abbreviation
+        int course_num;     //course number
+        String subj_name; //for example: MATH
+        String class_name; //for example: Linear Algebra
         
-        public Course(int num, String name, String abr)
+        public Course(int num, String subjName, String className)
         {
-            courseNum = num;
-            courseName = name;
-            courseAbbr = abr;
+            course_num = num;
+            subj_name = subjName;
+            class_name = className;
         }
         
     }
