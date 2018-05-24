@@ -5,6 +5,7 @@
  */
 package test_backend;
 
+import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -66,12 +67,32 @@ public class TestWebParser {
     
     @Test
     /**
+     * testLoading tests if the HTML strings were loaded into the queue upon object construction
+     */
+    public void testLoading()
+    {
+        WebScraper ws = new WebScraper();
+        assertTrue(ws.queueSize() >  0);
+    }
+        
+    
+    @Test
+    /**
      * testParsing tests if parsing is completed correctly.
      * There should be a .csv file with correctly formated text in the working directory
      */
     public void testParsing()
     {
         WebScraper ws = new WebScraper();
-        ws.loadStrings();
+    }
+    
+    @Test
+    /**
+     * testNoInternet tests if the HTML strings would be loaded if Internet is down
+     * If this test passes, that means an exception was thrown
+     */
+    public void testNoInternet()
+    {
+        //WebScraper ws = new WebScraper(); //should throw an exception upon construction when wi-fi is turned off
     }
 }

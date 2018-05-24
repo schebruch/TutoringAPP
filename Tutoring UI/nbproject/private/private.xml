@@ -3,12 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+<<<<<<< HEAD
             <file>file:/C:/Users/scheb/SummerProject2018/TutoringAPP/Tutoring%20UI/test/test_backend/TestTutor.java</file>
             <file>file:/C:/Users/scheb/SummerProject2018/TutoringAPP/Tutoring%20UI/src/tutoring/Session.java</file>
             <file>file:/C:/Users/scheb/SummerProject2018/TutoringAPP/Tutoring%20UI/src/tutoring/Student.java</file>
             <file>file:/C:/Users/scheb/SummerProject2018/TutoringAPP/Tutoring%20UI/src/tutoring/Tutor.java</file>
             <file>file:/C:/Users/scheb/SummerProject2018/TutoringAPP/Tutoring%20UI/src/tutoring/Section.java</file>
             <file>file:/C:/Users/scheb/SummerProject2018/TutoringAPP/Tutoring%20UI/test/test_backend/TestStudent.java</file>
+=======
+            <file>file:/home/cameron/TutoringAPP/Tutoring%20UI/src/tutoring/WebScraper.java</file>
+            <file>file:/home/cameron/TutoringAPP/Tutoring%20UI/test/test_backend/TestWebParser.java</file>
+>>>>>>> 9d0cc347aae52061a4bc50d03f9ad9f4098da27c
         </group>
     </open-files>
 </project-private>
