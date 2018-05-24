@@ -58,6 +58,7 @@ public class WebScraper {
             return;
         }
         
+        boolean insertedSomething = false;
         //for each parsed course, check if it is already in the DB. Add it if not
         for(int i = 0; i < parsedCourses.size(); i++)
         {
@@ -68,13 +69,23 @@ public class WebScraper {
                 ResultSet r = s.executeQuery(checkForExistingDuplicate);
                 if(!r.next()) //if there are no existing courses in the DB
                 {
+                    System.out.println("Inserting: " + current.course_num + " " + current.subj_name);
                     insertCourse(s, Integer.parseInt(current.course_num), current.subj_name, current.course_name); //insert this course into the CLASS relation
+                    insertedSomething = true;
                 }
             }catch(SQLException e) //Query failed
             {
                 System.out.println("Could not check for existing courses");
             }
         }
+        if(!insertedSomething)
+        {
+            System.out.println("No new courses are being tutored");
+        }
+        else{
+            System.out.println("We had to insert some courses");
+        }
+        System.out.println("All courses are up to date");
     }
     
      /**
