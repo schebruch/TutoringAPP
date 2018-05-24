@@ -52,12 +52,13 @@ public class WebScraper {
             con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
             s = con.createStatement();
             System.out.println("Connection successful");        
-        }catch(SQLException e)
+        }catch(SQLException e) //DB Connection failed
         {
             System.out.println("DB connection failed");
             return;
         }
         
+        //for each parsed course, check if it is already in the DB. Add it if not
         for(int i = 0; i < parsedCourses.size(); i++)
         {
             Course current = parsedCourses.get(i);
@@ -67,9 +68,9 @@ public class WebScraper {
                 ResultSet r = s.executeQuery(checkForExistingDuplicate);
                 if(!r.next()) //if there are no existing courses in the DB
                 {
-                    insertCourse(s, current.course_num, current.subj_name, current.class_name);
+                    insertCourse(s, current.course_num, current.subj_name, current.class_name); //insert this course into the CLASS relation
                 }
-            }catch(SQLException e)
+            }catch(SQLException e) //Query failed
             {
                 System.out.println("Could not check for existing courses");
             }
@@ -196,14 +197,16 @@ public class WebScraper {
     {
         
     }
-    
+    /**
+     * insertCourse() inserts a course that needs to be inserted into the DB
+     */
     private void insertCourse(Statement s, int course_num, String subj_name, String class_name)
     {
         String insertThisCourse = "insert into CLASS(course_num, subj_name, class_name) values(" + course_num + ", '" + subj_name + "', '" + class_name + "')";
         try
         {
             s.executeUpdate(insertThisCourse);
-        }catch(SQLException e)
+        }catch(SQLException e) //insert failed
         {
             System.out.println("Insert failed");
         }
