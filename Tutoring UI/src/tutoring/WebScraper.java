@@ -169,7 +169,6 @@ public class WebScraper {
         
     }
     
-    
     /**
      * Class represents a course from the Website
      */
