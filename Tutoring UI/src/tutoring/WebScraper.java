@@ -76,7 +76,7 @@ public class WebScraper {
                 if (!r.next()) //if there are no existing courses in the DB
                 {
                     System.out.println("Inserting: " + current.course_num + " " + current.subj_name);
-                    insertCourse(s, Integer.parseInt(current.course_num), current.subj_name, current.course_name); //insert this course into the CLASS relation
+                    insertCourse(s, Integer.parseInt(current.course_num), current.subj_name); //insert this course into the CLASS relation
                     insertedSomething = true;
                 }
             }catch(SQLException e) //Query failed
@@ -186,30 +186,13 @@ public class WebScraper {
             /* The course array is arranged as following:
                      subj_name   is course[0]
                      course_num  is course[1]
-                     course_name is course[2]
              */
+            Course c = new Course(course[1], course[0]);
             //create a course by handling appropriate cases
-            if (course.length == 2) //no course name
-            {
-                Course c = new Course(course[1], course[0], null);
-
-                //check for a double course in one line situation
-                if (hasDoubleCourse(c.course_num)) {
-                    processDoubleCourse(c);
-
-                } else {
-
-                    parsedCourses.add(c);
-                }
+             if (hasDoubleCourse(c.course_num)) {
+                 processDoubleCourse(c);
             } else {
-                Course c = new Course(course[1], course[0], course[2]);
-                if (hasDoubleCourse(c.course_num)) {
-                    processDoubleCourse(c);
-
-                } else {
-
-                    parsedCourses.add(c);
-                }
+                parsedCourses.add(c);
             }
         }
     }
@@ -226,20 +209,10 @@ public class WebScraper {
         String first_num = c.course_num.substring(0, c.course_num.indexOf('/'));
         String second_num = c.course_num.substring(c.course_num.indexOf('/') + 1, c.course_num.length());
 
-        String first_course_name = null;
-        String second_course_name = null;
-
-        //separating the course names that contains I and II into two separate course names
-        if (c.course_name != null) {
-            first_course_name = c.course_name.substring(0, c.course_name.indexOf('I') + 1);
-
-            second_course_name = first_course_name.substring(0, first_course_name.indexOf('I')) + "II";
-        }
-
         //adding to array list of courses
-        Course one = new Course(first_num, courseSubject, first_course_name);
-        Course two = new Course(second_num, courseSubject, second_course_name);
-
+        Course one = new Course(first_num, courseSubject);
+        Course two = new Course(second_num, courseSubject);
+                
         parsedCourses.add(one);
         parsedCourses.add(two);
 
@@ -263,8 +236,8 @@ public class WebScraper {
     /**
      * insertCourse() inserts a course that needs to be inserted into the DB
      */
-    private void insertCourse(Statement s, int course_num, String subj_name, String class_name) {
-        String insertThisCourse = "insert into CLASS(course_num, subj_name, class_name) values(" + course_num + ", '" + subj_name + "', '" + class_name + "')";
+    private void insertCourse(Statement s, int course_num, String subj_name) {
+        String insertThisCourse = "insert into CLASS(course_num, subj_name) values(" + course_num + ", '" + subj_name + "')";
         try {
             s.executeUpdate(insertThisCourse);
         } catch (SQLException e) //insert failed
@@ -280,17 +253,15 @@ public class WebScraper {
 
         String course_num;     //course number
         String subj_name; //for example: MATH
-        String course_name; //for example: Linear Algebra
 
-        public Course(String num, String subjName, String courseName) {
+        public Course(String num, String subjName) {
             course_num = num;
             subj_name = subjName;
-            course_name = courseName;
         }
 
         @Override
         public String toString() {
-            return course_num + " " + subj_name + " " + course_name;
+            return course_num + " " + subj_name;
         }
 
     }

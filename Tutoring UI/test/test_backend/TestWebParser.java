@@ -97,15 +97,15 @@ public class TestWebParser {
         assertEquals(Integer.parseInt("003"), 3);
     }
     
-    /**
-     * Tests if the parsed courses are the same as what is currently in the DB
-     */
-    @Test
-    public void testNoUpdateNecessary()
-    {
-        WebScraper ws = new WebScraper();
-        ws.checkDB();
-    }
+//    /**
+//     * Tests if the parsed courses are the same as what is currently in the DB
+//     */
+//    @Test
+//    public void testNoUpdateNecessary()
+//    {
+//        WebScraper ws = new WebScraper();
+//        ws.checkDB();
+//    }
     
 
     /*
@@ -113,7 +113,7 @@ public class TestWebParser {
     public void testUpdateNecessary()
     {
         WebScraper ws = new WebScraper();
-        ws.addCourse(new WebScraper.Course("231", "MATH", "Probability and Statistics"));
+        ws.addCourse(new WebScraper.Course("231", "MATH"));
         ws.checkDB();
     }*/
       
