@@ -5,6 +5,7 @@
  */
 package test_backend;
 
+import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -83,5 +84,15 @@ public class TestWebParser {
     public void testParsing()
     {
         WebScraper ws = new WebScraper();
+    }
+    
+    @Test
+    /**
+     * testNoInternet tests if the HTML strings would be loaded if Internet is down
+     * If this test passes, that means an exception was thrown
+     */
+    public void testNoInternet()
+    {
+        //WebScraper ws = new WebScraper(); //should throw an exception upon construction when wi-fi is turned off
     }
 }
