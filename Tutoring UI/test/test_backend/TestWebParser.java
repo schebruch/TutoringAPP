@@ -57,42 +57,34 @@ public class TestWebParser {
     
     @Test
     /**
-     * testGetTitle tests if the title of the HTML page can be read in correctly
+     * testGetTitle() tests if the title of the HTML page can be read in correctly
      */
     public void testGetTitle()
     {
         WebScraper ws = new WebScraper();
         assertEquals(ws.getTitle(), "Courses with Tutoring | Student Affairs");
     }
-    
+
+            
     @Test
     /**
-     * testLoading tests if the HTML strings were loaded into the queue upon object construction
-     */
-    public void testLoading()
-    {
-        WebScraper ws = new WebScraper();
-        assertTrue(ws.queueSize() >  0);
-    }
-        
-    
-    @Test
-    /**
-     * testParsing tests if parsing is completed correctly.
-     * There should be a .csv file with correctly formated text in the working directory
+     * testParsing() tests if parsing is completed correctly.
+     * To pass the test, the programmer should inspect that the array list of classes were loaded correctly by print inspection
      */
     public void testParsing()
     {
         WebScraper ws = new WebScraper();
+        ws.printCourseList();
     }
     
     @Test
     /**
-     * testNoInternet tests if the HTML strings would be loaded if Internet is down
+     * testNoInternet() tests if the HTML strings would be loaded if Internet is down
      * If this test passes, that means an exception was thrown
      */
     public void testNoInternet()
     {
         //WebScraper ws = new WebScraper(); //should throw an exception upon construction when wi-fi is turned off
     }
+    
 }

@@ -103,6 +103,18 @@ public class WebScraper {
     {
         return doc.title();
     }
+    
+    /**
+     * printCourseList() prints the list of courses that were parsed into the ArrayList
+     */
+    public void printCourseList()
+    {
+        for(Course c: parsedCourses)
+        {
+            System.out.println(c);
+        }
+        
+    }
        
     
     /**
@@ -139,7 +151,13 @@ public class WebScraper {
         while(itr.hasNext())
         {
             String html = itr.next().html();
-            html = html.replaceAll("&amp;", "and").replaceAll("\\*", "").replaceAll("</p>", "").replaceAll(" +", " ").trim(); //string cleaning
+            //string cleaning
+            html = html.replaceAll("&amp;", "and")
+                    .replaceAll("\\*", "")
+                    .replaceAll("</p>", "")
+                    .replaceAll(" +", " ")
+                    .trim(); 
+            
             String [] separatedClasses = html.split("<br>"); //split by break in the html
             
             for(int i = 1; i < separatedClasses.length; i++) //skipping the first index because it is a header
@@ -157,9 +175,7 @@ public class WebScraper {
                             spaceCounter++;
                         }
                     }   
-                }
-                
-                System.out.println(sb.toString());
+                }             
                 allCourses.add(sb.toString());
             }
         }       
@@ -173,10 +189,13 @@ public class WebScraper {
         while(!allCourses.isEmpty())
         {
             String [] course = allCourses.poll().split("\\+");
-            //subj_name = course[0]
-            //course_num = course[1]
-            //course_name = course[2]
-
+            
+            /* The course array is arranged as following:
+                     subj_name   is course[0]
+                     course_num  is course[1]
+                     course_name is course[2]
+            */
+            
             //create a course by handling appropriate cases
             if(course.length == 2) //no course name
             {
@@ -185,11 +204,22 @@ public class WebScraper {
                 //check for a double course in one line situation
                 if(hasDoubleCourse(c.course_num))
                 {
+                    processDoubleCourse(c);
+                           
+                } else {
                     
-                }   
+                    parsedCourses.add(c);
+                }  
             } else {
                 Course c = new Course(course[1], course[0], course[2]);
-
+                if(hasDoubleCourse(c.course_num))
+                {
+                    processDoubleCourse(c);
+                    
+                } else {
+                    
+                    parsedCourses.add(c);
+                }
             }
         }
     }
@@ -200,12 +230,39 @@ public class WebScraper {
      */
     private void processDoubleCourse(Course c)
     {
+      String courseSubject = c.subj_name;
+      
+      //separating course number by '/' character ie. 51/52 will be separated into 51 52
+      String first_num = c.course_num.substring(0, c.course_num.indexOf('/'));
+      String second_num = c.course_num.substring(c.course_num.indexOf('/')+1, c.course_num.length());
+      
+      String first_course_name = null;
+      String second_course_name = null;
+      
+      //separating the course names that contains I and II into two separate course names
+      if(c.course_name != null){
+        first_course_name = c.course_name.substring(0,c.course_name.indexOf('I')+1);
+      
+        second_course_name = first_course_name.substring(0, first_course_name.indexOf('I')) + "II";
+      }
+      
+      //adding to array list of courses
+      Course one = new Course(first_num, courseSubject, first_course_name);
+      Course two = new Course(second_num, courseSubject, second_course_name);
+      
+      parsedCourses.add(one);
+      parsedCourses.add(two);
       
     }
     
+    /**
+     * hasDoubleCourse() checks if a course number contains a '/' character, indicating two courses were described in one line
+     * @param courseNum the course number as a string
+     * @return whether the course number contains '/'
+     */
     private boolean hasDoubleCourse(String courseNum)
     {
-        for(int i = 0; i<courseNum.charAt(i); i++)
+        for(int i = 0; i<courseNum.length(); i++)
         {
             if(courseNum.charAt(i) == '/')
             {
@@ -244,6 +301,12 @@ public class WebScraper {
             course_num = num;
             subj_name = subjName;
             course_name = courseName;
+        }
+        
+        @Override
+        public String toString()
+        {
+            return course_num + " " + subj_name + " " + course_name;
         }
         
     }
