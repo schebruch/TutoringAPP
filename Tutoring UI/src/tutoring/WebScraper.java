@@ -77,12 +77,18 @@ public class WebScraper {
         Elements classes = classBody.children(); //retrieving all child elements from classBody (obtaining individual courses)
         Iterator<Element> itr = classes.iterator();
         
-        itr.next(); //skipping the first line that doesn't have class info
+        itr.next(); //skipping the first element b/c it doesn't have class info
         while(itr.hasNext())
         {
             String html = itr.next().html();
             html = html.replaceAll("&amp;", "and").replaceAll("\\*", "").replaceAll("</p>", ""); //string cleaning
-            allClasses.add(html);
+            String [] separatedClasses = html.split("<br>"); //split by break in the html
+            
+            for(int i = 1; i < separatedClasses.length; i++) //skipping the first index because it is a header
+            {
+                System.out.println(separatedClasses[i]);
+                allClasses.add(separatedClasses[i]);
+            }
         }
        
     }
