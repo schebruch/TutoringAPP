@@ -15,7 +15,7 @@ import java.sql.*;
 
 /**
  *
- * @author scheb
+ * @author Samuel Chebruch
  */
 public class TestTutor {
     
