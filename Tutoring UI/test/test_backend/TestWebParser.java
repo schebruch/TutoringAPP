@@ -87,4 +87,14 @@ public class TestWebParser {
         //WebScraper ws = new WebScraper(); //should throw an exception upon construction when wi-fi is turned off
     }
     
+    @Test
+    /**
+     * testParseInt tests if 003 can be parsed to 3 with Integer.parseInt() because our database stores course numbers as ints and WebScraper.java reads course
+     * numbers in as strings 
+     */
+    public void testParseInt()
+    {
+        assertEquals(Integer.parseInt("003"), 3);
+    }
+    
 }
