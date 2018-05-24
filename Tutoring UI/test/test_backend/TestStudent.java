@@ -18,7 +18,7 @@ import tutoring.Student;
 /**
  *
  * @author Cameron Zurmuhl
- * @author Samuel Cheburch
+ * @author Samuel Chebruch
  */
 public class TestStudent {
     
