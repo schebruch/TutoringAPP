@@ -106,4 +106,15 @@ public class TestWebParser {
         WebScraper ws = new WebScraper();
         ws.checkDB();
     }
+    
+
+    /*
+    @Test
+    public void testUpdateNecessary()
+    {
+        WebScraper ws = new WebScraper();
+        ws.addCourse(new WebScraper.Course("231", "MATH", "Probability and Statistics"));
+        ws.checkDB();
+    }*/
+      
 }
