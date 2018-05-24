@@ -97,14 +97,6 @@ public class WebScraper {
         return doc.title() != null;  
     }
     
-      /**
-     * queueSize() returns the size of the allClasses queue
-     * @return allClasses.size()
-     */
-    public int queueSize()
-    {
-        return allCourses.size();
-    }
     
     /**
      * getTitle() returns the title of the HTML doc
