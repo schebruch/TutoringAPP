@@ -41,15 +41,22 @@ public class Student
     return LIN;
   }
   
+  public boolean getAthleteStatus()
+  {
+    return isAthlete;
+  }
+  
   public int getSkipCount(Statement s)
   {
       String q = "select skip_count from student where LIN = " + this.getLIN();
+      System.out.println(q);
       try
       {
           ResultSet r = s.executeQuery(q);
           if(!r.next())
           {
-              System.out.println("Student: " + this.getFirst() + " " + this.getLast() + " does not exist");
+              System.out.println("Student: " + this.getFirst() + " " + this.getLast() + " is not a student in your session");
+              return 0;
           }
           else
           {
@@ -62,10 +69,7 @@ public class Student
       return -1;
   }
 
-  public boolean getAthleteStatus()
-  {
-    return isAthlete;
-  }
+
   public String toString()
   {
     return "Name: " + first + " " + last + ".  Email: " + email +".  LIN: " + LIN + ".  Athlete Status: " + isAthlete + ".";
