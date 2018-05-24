@@ -66,12 +66,22 @@ public class TestWebParser {
     
     @Test
     /**
+     * testLoading tests if the HTML strings were loaded into the queue upon object construction
+     */
+    public void testLoading()
+    {
+        WebScraper ws = new WebScraper();
+        assertTrue(ws.queueSize() >  0);
+    }
+        
+    
+    @Test
+    /**
      * testParsing tests if parsing is completed correctly.
      * There should be a .csv file with correctly formated text in the working directory
      */
     public void testParsing()
     {
         WebScraper ws = new WebScraper();
-        ws.loadStrings();
     }
 }

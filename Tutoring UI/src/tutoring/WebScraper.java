@@ -27,7 +27,8 @@ public class WebScraper {
     public WebScraper()
     {
         establishConnection();
-        allClasses = new LinkedList<String>();
+        allClasses = new LinkedList<>();
+        loadStrings();
     }
     
     /**
@@ -71,7 +72,7 @@ public class WebScraper {
      * loadStrings parses the <div class = "body field> element in the HTML file for the tutored classes.
      * These classes are loaded into this.classesAsStrings queue for processing
      */
-    public void loadStrings()
+    private void loadStrings()
     {
         Element classBody = doc.getElementsByAttributeValue("class", "body field").first(); //retrieving the section of the HTML code that has the courses 
         Elements classes = classBody.children(); //retrieving all child elements from classBody (obtaining individual courses)
@@ -81,15 +82,23 @@ public class WebScraper {
         while(itr.hasNext())
         {
             String html = itr.next().html();
-            html = html.replaceAll("&amp;", "and").replaceAll("\\*", "").replaceAll("</p>", ""); //string cleaning
+            html = html.replaceAll("&amp;", "and").replaceAll("\\*", "").replaceAll("</p>", "").replaceAll(" +", " ").trim(); //string cleaning
             String [] separatedClasses = html.split("<br>"); //split by break in the html
             
             for(int i = 1; i < separatedClasses.length; i++) //skipping the first index because it is a header
             {
-                System.out.println(separatedClasses[i]);
                 allClasses.add(separatedClasses[i]);
             }
         }
        
+    }
+    
+    /**
+     * queueSize() returns the size of the allClasses queue
+     * @return allClasses.size()
+     */
+    public int queueSize()
+    {
+        return allClasses.size();
     }
 }
