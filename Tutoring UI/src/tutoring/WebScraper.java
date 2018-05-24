@@ -62,13 +62,13 @@ public class WebScraper {
         for(int i = 0; i < parsedCourses.size(); i++)
         {
             Course current = parsedCourses.get(i);
-            String checkForExistingDuplicate = "select* from CLASS where course_num = " + current.course_num + " and subj_name = '" + current.subj_name +"')";
+            String checkForExistingDuplicate = "select* from CLASS where course_num = " + Integer.parseInt(current.course_num) + " and subj_name = '" + current.subj_name +"')";
             try
             {
                 ResultSet r = s.executeQuery(checkForExistingDuplicate);
                 if(!r.next()) //if there are no existing courses in the DB
                 {
-                    insertCourse(s, current.course_num, current.subj_name, current.class_name); //insert this course into the CLASS relation
+                    insertCourse(s, Integer.parseInt(current.course_num), current.subj_name, current.course_name); //insert this course into the CLASS relation
                 }
             }catch(SQLException e) //Query failed
             {
@@ -106,7 +106,7 @@ public class WebScraper {
        
     
     /**
-     * establishConnection initializes a connection to the HTML file
+     * establishConnection() initializes a connection to the HTML file
      */
     private void establishConnection()
     {
@@ -126,7 +126,7 @@ public class WebScraper {
     
     
     /**
-     * loadStrings parses the <div class = "body field> element in the HTML file for the tutored classes.
+     * loadStrings() parses the <div class = "body field> element in the HTML file for the tutored classes.
      * These classes are loaded into this.classesAsStrings queue for processing
      */
     private void loadStrings()
@@ -172,18 +172,23 @@ public class WebScraper {
     {
         while(!allCourses.isEmpty())
         {
-                        String [] course = allCourses.poll().split("\\+");
+            String [] course = allCourses.poll().split("\\+");
+            //subj_name = course[0]
+            //course_num = course[1]
+            //course_name = course[2]
 
             //create a course by handling appropriate cases
             if(course.length == 2) //no course name
             {
-                Course c = new Course(Integer.parseInt(course[1]), course[0], null);
+                Course c = new Course(course[1], course[0], null);
                 
                 //check for a double course in one line situation
-                
-                
+                if(hasDoubleCourse(c.course_num))
+                {
+                    
+                }   
             } else {
-                Course c = new Course(Integer.parseInt(course[1]), course[0], course[2]);
+                Course c = new Course(course[1], course[0], course[2]);
 
             }
         }
@@ -195,8 +200,22 @@ public class WebScraper {
      */
     private void processDoubleCourse(Course c)
     {
-        
+      
     }
+    
+    private boolean hasDoubleCourse(String courseNum)
+    {
+        for(int i = 0; i<courseNum.charAt(i); i++)
+        {
+            if(courseNum.charAt(i) == '/')
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
     /**
      * insertCourse() inserts a course that needs to be inserted into the DB
      */
@@ -213,18 +232,18 @@ public class WebScraper {
     }
     
     /**
-     * Class represents a course from the Website
+     * Course represents a course from the Website
      */
     private static class Course {
-        int course_num;     //course number
+        String course_num;     //course number
         String subj_name; //for example: MATH
-        String class_name; //for example: Linear Algebra
+        String course_name; //for example: Linear Algebra
         
-        public Course(int num, String subjName, String className)
+        public Course(String num, String subjName, String courseName)
         {
             course_num = num;
             subj_name = subjName;
-            class_name = className;
+            course_name = courseName;
         }
         
     }
