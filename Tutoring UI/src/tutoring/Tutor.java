@@ -1,3 +1,5 @@
+
+/*
 package tutoring;
 
 import java.util.Scanner;
@@ -11,15 +13,30 @@ public class Tutor
   private String name;
   private ArrayList<Section> sections = new ArrayList<>();
   private int LIN;
+  private static Connection con;
+  private static Statement s;
 
-  public Tutor(String name, int LIN, Statement s, boolean existingTutor)
+  public Tutor(String name, int LIN, boolean existingTutor)
   {
+    try
+    {
+      Class.forName("org.sqlite.JDBC");
+      con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
+      s = con.createStatement();
+      System.out.println("Connection successful");
+    }catch(Exception e)
+    {
+      System.out.println("Could not connect");
+      System.exit(0);
+    }
+
+    
     this.LIN = LIN;
     this.name = name;
     if(!existingTutor)
     {
-        String q = "insert into TUTOR values(" + LIN + ", '" + name + "')";
-        try{
+       String q = "insert into TUTOR values(" + LIN + ", '" + name + "')";
+       try{
            s.executeUpdate(q);
        }catch(Exception e)
         {
@@ -48,8 +65,8 @@ public class Tutor
   {
     return sections;
   }*/
-  
-  public static boolean isTutor(Statement s)
+  /*
+  public static boolean isTutor()
   {
       String q = "select* from tutor";
       try
@@ -208,7 +225,7 @@ public class Tutor
       return null;
   }
   
-  public static String getSubjName(int idx, Statement s)
+  public static String getSubjName(int idx)
   {
       int count = 0;
       try
@@ -227,7 +244,7 @@ public class Tutor
       return null;
   }
   
-  public static int getCourseNum(int idx, Statement s)
+  public static int getCourseNum(int idx)
   {
       int count = 0;
       try
@@ -246,7 +263,7 @@ public class Tutor
       return 0;
   }
   
-  public Section getSection(int idx, Statement s)
+  public Section getSection(int idx)
   {
       int count = 0;
       try
@@ -257,7 +274,7 @@ public class Tutor
               r.next();
               count++;
           }while(count < idx);
-          return new Section(r.getString("class_name"), r.getString("subj_name"), r.getInt("course_num"), r.getString("Day_of_Week"), r.getString("time_held"), r.getString("semester"), r.getInt("year"));
+          return new Section( r.getString("subj_name"), r.getInt("course_num"), r.getString("Day_of_Week"), r.getString("time_held"), r.getString("semester"), r.getInt("year"));
       }catch(Exception e)
       {
           e.printStackTrace();
@@ -271,7 +288,7 @@ public class Tutor
     System.out.println("Would you like to:\n1. Register as a tutor\n2. Add classes\n3. Add students to a class\n4. Take attendance\n5. Remove a student\n6. Quit");
   }
 
-  public boolean displayCurrentSections(Statement s)
+  public boolean displayCurrentSections()
   {
     ResultSet r = null;
     try
@@ -299,12 +316,12 @@ public class Tutor
     for(int i = 0; i < sections.size(); i++)
     {
       System.out.println((i+1) + ". " + sections.get(i).toString());
-    }*/
+    }
     return false;
-  }
-  
+  }*/
+  /*
   //returns num rows
-  public int displayOfferedClasses(Statement s)
+  public int displayOfferedClasses()
   {
       System.out.printf("%-10s\t%-10s\t%-10s\n\n", "COURSE_NUM", "SUBJ_NAME", "CLASS_NAME");
       String q = "select* from Class";
@@ -326,7 +343,7 @@ public class Tutor
       return 0;
   }
   
-  private boolean canTeach(Section tmp, Statement s)
+  private boolean canTeach(Section tmp)
   {
       String q = "select* from SECTION where semester = '" + tmp.getSemester() + "' and year = " + tmp.getYear() + " and Day_of_Week = '" + tmp.getDay() + "' and time_held = '" + tmp.getTime() + "'";
       try
@@ -352,7 +369,7 @@ public class Tutor
     String className = null;  
     for(int i = 0; i < numClasses; i++)
     {
-      int maxCourses = displayOfferedClasses(s);
+      int maxCourses = displayOfferedClasses();
       System.out.println("Please enter the corresponding number given for this class");
       int classIdx = getOption(1, maxCourses);
       className = getClassName(classIdx, s);
@@ -363,9 +380,9 @@ public class Tutor
       System.out.println("What semester is this being tutored? Please select an option");
       String semester = getSemester();
       int year = getYear();
-      String subj = getSubjName(classIdx, s);
-      int course_num = getCourseNum(classIdx, s);
-      Section tmp = new Section(className, subj, course_num,  day, time, semester, year);
+      String subj = getSubjName(classIdx);
+      int course_num = getCourseNum(classIdx);
+      Section tmp = new Section( subj, course_num,  day, time, semester, year);
       if(!updateSection(s, tmp))
       {
           i--;
@@ -379,7 +396,7 @@ public class Tutor
   {
       try
       {
-        if(!canTeach(tmp,s))
+        if(!canTeach(tmp))
         {
             System.out.println("You are already tutoring a course that conflicts with this time. Please select another option.");
             return false;
@@ -394,12 +411,12 @@ public class Tutor
       }
   }
  
-  public void addStudents(Statement s)
+  public void addStudents()
   {
-    if(this.displayCurrentSections(s))
+    if(this.displayCurrentSections())
     {
       int classNum = getOption(1, this.getNumSections(s));
-      this.getSection(classNum,s).addStudents(s);
+      this.getSection(classNum).addStudents();
     }
     else
     {
@@ -407,15 +424,15 @@ public class Tutor
     }
   }
 
-  public void takeAttendance(Statement s)
+  public void takeAttendance()
   {
     if(this.getNumSections(s) > 0)
     {
       System.out.println("Which class are you taking attendance for? Please select a number.");
       int classNum = getOption(1, this.getNumSections(s));
-      Section current = getSection(classNum, s);
-      current.addStudentsToList(s);
-      Session attendance = new Session(current.getName(), current.getStudents(), current.getDay(), current.getTime());
+      Section current = getSection(classNum);
+     // current.addStudentsToList();
+      Session attendance = new Session( "MATH", current.getStudents(), current.getDay(), current.getTime());
       attendance.takeAttendance();
       System.out.println("Attending Students:\n");
       attendance.printAttended();
@@ -428,13 +445,13 @@ public class Tutor
     }
   }
 
-  public void removeStudent(Statement s)
+  public void removeStudent()
   {
     if(this.getNumSections(s) > 0)
     {
       int classNum = getOption(1, getNumSections(s));
       Section current = sections.get(classNum - 1);
-      current.removeStudent();
+     // current.removeStudent();
     }
   }
 
@@ -453,7 +470,7 @@ public class Tutor
       System.exit(0);
     }
     Tutor tutor = null;
-    boolean isTutor = Tutor.isTutor(s);
+    boolean isTutor = Tutor.isTutor();
     if(isTutor)
     {
         try
@@ -463,7 +480,7 @@ public class Tutor
             r.next();
             int LIN = r.getInt("LIN");
             String name = r.getString("tutor_name");
-            tutor = new Tutor(name, LIN, s, true);
+            tutor = new Tutor(name, LIN, true);
         }catch(Exception e)
         {
             e.printStackTrace();
@@ -479,7 +496,7 @@ public class Tutor
         String name = Tutor.getStringOption("[A-Z][a-z]+[ ][A-Z][a-z]+");
         System.out.println("Please enter your LIN: ");
         int LIN = Tutor.getOption(9);
-        tutor = new Tutor(name, LIN, s, false);
+        tutor = new Tutor(name, LIN, false);
         isTutor = true;
         System.out.println("Congratulations! " + name  + " is now registered as a tutor! Now type '2' in to add classes!");
         continue;
@@ -498,32 +515,32 @@ public class Tutor
       {
         tutor.addSections(s);
         System.out.println("All of your sections are as follows:\n");
-        tutor.displayCurrentSections(s);
+        tutor.displayCurrentSections();
         continue;
       }
       if(option == 3)
       {
-        tutor.addStudents(s);
+        tutor.addStudents();
         continue;
       }
       if(option == 4)
       {
-        if(!tutor.displayCurrentSections(s))
+        if(!tutor.displayCurrentSections())
         {
             System.out.println("You don't have any classes currently created. Please create some by pressing '2'");
             continue;
         }
-        tutor.takeAttendance(s);
+        tutor.takeAttendance();
         continue;
       }
       if(option == 5)
       {
-        if(!tutor.displayCurrentSections(s))
+        if(!tutor.displayCurrentSections())
         {
             System.out.println("You don't have any classes currently created. Please create some by pressing '2'");
             continue;
         }
-        tutor.removeStudent(s);
+        tutor.removeStudent();
         continue;
       }
       if(option == 6)
@@ -542,3 +559,5 @@ public class Tutor
     }
   }
 }
+
+*/

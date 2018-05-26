@@ -57,47 +57,4 @@ public class TestStudent {
         //JUnit assert API can be found here https://junit.org/junit4/javadoc/latest/
     }
 
-    /**
-     * Tests the skip count for a student not currently in the DB. Should return 0
-     */
-    @Test
-    public void testGetSkipCountStudentNotExist() {
-        Student student = new Student("Donald", "Trump", "schebruch@gmail.com", 123456789, false);
-        Connection con = null;
-        Statement s = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
-            s = con.createStatement();
-            System.out.println("Connection successful");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
-        System.out.println("Skip count for non-existing student Donald Trump: " + student.getSkipCount(s));
-    }
-
-    /**
-     * Tests the skip count for a student in the DB.  I verified with the DB that this passes
-     */
-    @Test
-    public void testGetSkipCountStudentExists() {
-        Student student = new Student("Cameron", "Zurmuhl", "zurmuhlc@lafayette.edu", 826568676, false);
-        Student student2 = new Student("Sam", "Chebruch", "schebruch@gmail.com", 111111112, false);
-        Student student3 = new Student("Sean", "King", "sean.king@lehigh.edu", 111111111, true);
-        Connection con = null;
-        Statement s = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
-            s = con.createStatement();
-            System.out.println("Connection successful");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
-        System.out.println("Skip count for existing student Cameron Zurmuhl: " + student.getSkipCount(s));
-        System.out.println("Skip count for existing student Sam Chebruch: " + student2.getSkipCount(s));
-        System.out.println("Skip count for existing student Sean King: " + student3.getSkipCount(s));    
-    }
 }
