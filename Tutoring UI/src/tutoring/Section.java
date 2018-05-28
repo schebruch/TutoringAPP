@@ -145,31 +145,26 @@ public class Section {
         }
         return -1;
     }
-
-    /*
-    public void addStudents() {
-        Scanner in = new Scanner(System.in);
-        System.out.println("How many students would you like to add?");
-        int numStudents = Tutor.getOption(0, 12);
-        for (int i = 0; i < numStudents; i++) {
-            System.out.println("Please enter the student's first name for student: " + (i + 1));
-            String first = Tutor.getStringOption("[A-Z][a-z]+");
-            System.out.println("Please enter " + first + "'s last name.");
-            String last = Tutor.getStringOption("[A-Z][a-z]+");
-            System.out.println("Please enter " + first + "'s' email address.");
-            String email = Tutor.getStringOption("[A-Za-z0-9_.-]+[a-zA-Z0-9][@][A-Za-z_0-9-]+[.][a-zA-Z.]+[a-zA-Z]+");
-            boolean isAthlete = Tutor.getBoolOption("Is " + first + " " + last + " an athlete? Answer 'yes' or 'no'.");
-            System.out.println("Please enter " + first + "'s LIN");
-            int LIN = Tutor.getOption(9);
-            Student tmp = new Student(first, last, email, LIN, isAthlete);
-            if (!insertNewStudent(tmp)) {
-                System.out.println("You have already used this LIN for another student. Please re-enter");
-                i--;
-                continue;
-            }
-            students.add(tmp);
+    
+    /**
+     * Allows the tutor to set the skip count for a student
+     * @param student
+     * @param skipCount 
+     */
+    public void setSkipCount(Student student, int skipCount)
+    {
+        assert(skipCount >= 0);
+        String updateSkipCount = "update ENROLLED_IN set skip_count = " + skipCount + " where LIN = " + student.getLIN();
+        try
+        {
+            s.executeUpdate(updateSkipCount);
+        }catch(SQLException e)
+        {
+            
         }
-    }*/
+        
+    }
+
     /**
      * @param toRemove is the student we are removing Removes a student from the
      * section (and the DB)

@@ -1,5 +1,3 @@
-
-/*
 package tutoring;
 
 import java.util.Scanner;
@@ -8,42 +6,60 @@ import java.sql.*;
 import java.util.Date;
 import java.util.Calendar;
 
-public class Tutor
-{
-  private String name;
-  private ArrayList<Section> sections = new ArrayList<>();
-  private int LIN;
-  private static Connection con;
-  private static Statement s;
+public class Tutor {
 
-  public Tutor(String name, int LIN, boolean existingTutor)
-  {
-    try
-    {
-      Class.forName("org.sqlite.JDBC");
-      con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
-      s = con.createStatement();
-      System.out.println("Connection successful");
-    }catch(Exception e)
-    {
-      System.out.println("Could not connect");
-      System.exit(0);
-    }
+    private String name;
+    private ArrayList<Section> sections = new ArrayList<>();
+    private int LIN;
+    private static Connection con;
+    private static Statement s;
 
-    
-    this.LIN = LIN;
-    this.name = name;
-    if(!existingTutor)
-    {
-       String q = "insert into TUTOR values(" + LIN + ", '" + name + "')";
-       try{
-           s.executeUpdate(q);
-       }catch(Exception e)
-        {
-           e.printStackTrace();
+    public Tutor(String name, int LIN) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
+            s = con.createStatement();
+            System.out.println("Connection successful");
+        } catch (Exception e) {
+            System.out.println("Could not connect");
+            System.exit(0);
+        }
+
+        assert(getCharactersLIN(LIN) == 9);
+        this.LIN = LIN;
+        assert(name.matches("[A-Z][a-z]+[ ][A-Z][a-z]+"));
+        this.name = name;
+        String q = "insert into TUTOR values(" + LIN + ", '" + name + "')";
+        try {
+            s.executeUpdate(q);
+        } catch (SQLException e) {
+            //ok if tutor already created
         }
     }
-   } 
+    
+    public int getLIN()
+    {
+        return LIN;
+    }
+    
+    public String getName()
+    {
+        return name;
+    }
+    
+        
+    /**
+     * Returns the number of characters in a LIN number.
+     * @return
+     */
+    private int getCharactersLIN(int LIN)
+    {
+        String LINString = Integer.toString(LIN);
+        return LINString.length();
+    }
+}
+
+/*
 
   //returns num rows in CLASS relation
   public int getNumSections(Statement s)
@@ -65,7 +81,7 @@ public class Tutor
   {
     return sections;
   }*/
-  /*
+ /*
   public static boolean isTutor()
   {
       String q = "select* from tutor";
@@ -319,7 +335,7 @@ public class Tutor
     }
     return false;
   }*/
-  /*
+ /*
   //returns num rows
   public int displayOfferedClasses()
   {
@@ -560,4 +576,4 @@ public class Tutor
   }
 }
 
-*/
+ */

@@ -70,41 +70,96 @@ public class Session extends Section {
         try {
             String attendanceQuery = getAttendanceString("ATTENDS", student, null);
             s.executeUpdate(attendanceQuery);
-            attended.add(student);
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            //ok if attendance was already taken. May be if the user edits an initial erroneuous entry
+        } finally {
+            if (!attended.contains(student)) {
+
+                attended.add(student);
+            }
         }
     }
 
     /**
-     * Allows the tutor to mark someon as absent
+     * Allows the tutor to mark someone as absent Updates the skip count for
+     * that student if the reason is NA
+     *
      * @param student refers to the student we are marking as absent
-     * @param reason refers to the reason the student provides for being absent. By default, reason = "NA"
+     * @param reason refers to the reason the student provides for being absent.
+     * By default, reason = "NA"
      */
     public void markSkipped(Student student, String reason) {
         try {
             String attendanceQuery = getAttendanceString("SKIPS", student, reason);
             s.executeUpdate(attendanceQuery);
-            missing.add(student);
-            reasons.add(reason);
+            if (reason.equalsIgnoreCase("NA")) {
+
+                int skipCountUpdate = 1 + getSkipCount(student);
+                String skipUpdate = "update ENROLLED_IN set skip_count = " + skipCountUpdate + " where LIN = " + student.getLIN();
+                s.executeUpdate(skipUpdate);
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            //  e.printStackTrace();
+        } finally {
+            if (!missing.contains(student)) {
+
+                missing.add(student);
+                reasons.add(reason);
+            }
+
         }
     }
 
-    /*
-    public void takeAttendance() {
-        boolean showedUp = false;
-        for (int i = 0; i < students.size(); i++) {
-            showedUp = Tutor.getBoolOption("Did student " + students.get(i).getFirst() + " " + students.get(i).getLast() + " attend this session?");
-            if (showedUp) {
-                attended.add(students.get(i));
-            } else {
-                missing.add(students.get(i));
-                reasons.add(getReason(students.get(i).getFirst(), students.get(i).getLast()));
-            }
+    /**
+     * Allows tutor to remove
+     *
+     * @param student from list of attending students
+     */
+    public void removeAttended(Student student) {
+        String update = "delete from ATTENDS where LIN = " + student.getLIN();
+        try {
+            s.executeUpdate(update);
+        } catch (SQLException e) {
         }
-    }*/
+    }
+
+    /**
+     * Allows tutor to remove
+     *
+     * @param student from the list of missing students and also reduces the
+     * skip count if the reason was NA
+     */
+    public void removeSkipped(Student student) {
+        String skippedQuery = "select* from SKIPS where LIN = " + student.getLIN();
+        boolean lowerSkipCount = false;
+        try {
+            
+            ResultSet r = s.executeQuery(skippedQuery);
+            r.next();
+            String reason = r.getString("reason");
+            if(reason.equalsIgnoreCase("NA"))
+            {
+                lowerSkipCount = true;
+            }
+            Statement s2 = con.createStatement();
+            Statement s3 = con.createStatement();
+            String deleteSkipped = "delete from SKIPS where LIN = " + student.getLIN();
+            s2.executeUpdate(deleteSkipped);
+            String skipDecrement = null;
+            if(lowerSkipCount)
+            {
+                skipDecrement = "update ENROLLED_IN set skip_count = " + (getSkipCount(student) - 1) + " where LIN = " + student.getLIN();
+                s3.executeUpdate(skipDecrement);
+            }
+            s2.close();
+            s3.close();
+
+        }catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Prints the list of attending students in the required format
@@ -122,10 +177,11 @@ public class Session extends Section {
 
     /**
      * Returns attendance String in desired format
+     *
      * @param missing refers to the missing student
      * @param isAthlete refers to whether the student is an athlete or not
      * @param reason refers to the reason the student gave for missing
-     * @return 
+     * @return
      */
     public String missingToString(Student missing, String isAthlete, String reason) {
         return missing.getFirst() + "; " + missing.getLast() + "; " + missing.getLIN() + "; " + isAthlete + "; " + reason;
@@ -133,9 +189,10 @@ public class Session extends Section {
 
     /**
      * Returns the String of attending students in the desired format
+     *
      * @param attended refers to the attending student
      * @param isAthlete refers to the athlete status of the student
-     * @return 
+     * @return
      */
     public String attendedToString(Student attended, String isAthlete) {
         return attended.getFirst() + "; " + attended.getLast() + "; " + attended.getLIN() + "; " + isAthlete;
@@ -143,9 +200,10 @@ public class Session extends Section {
 
     /**
      * Prints students using toString()
+     *
      * @param students list of students to print
-     * @param missing determines whether the student attended or not
-     * If student didn't attend, print the reason as well
+     * @param missing determines whether the student attended or not If student
+     * didn't attend, print the reason as well
      */
     private void printStudents(ArrayList<Student> students, boolean missing) {
         String isAthlete = null;
@@ -172,7 +230,7 @@ public class Session extends Section {
         try {
             s.executeUpdate(instructsUpdate);
         } catch (SQLException e) {
-            e.printStackTrace();
+            //  e.printStackTrace();
         }
     }
 
@@ -185,8 +243,8 @@ public class Session extends Section {
      */
     private String getAttendanceString(String tableName, Student tmp, String reason) {
         if (reason == null) {
-            return "insert into " + tableName + "values('" + getSubj() + "', " + getCourseNum() + ", '" + getDay() + "', '" + getTime() + "', '" + getSemester() + "', " + getYear() + ", " + tmp.getLIN() + ", '" + getDateOfSession() + "')";
+            return "insert into " + tableName + " values('" + getSubj() + "', " + getCourseNum() + ", '" + getDay() + "', '" + getTime() + "', '" + getSemester() + "', " + getYear() + ", " + tmp.getLIN() + ", '" + getDateOfSession() + "')";
         }
-        return "insert into " + tableName + "values('" + getSubj() + "', " + getCourseNum() + ", '" + getDay() + "', '" + getTime() + "', '" + getSemester() + "', " + getYear() + ", " + tmp.getLIN() + ", '" + getDateOfSession() + "', '" + reason + "')";
+        return "insert into " + tableName + " values('" + getSubj() + "', " + getCourseNum() + ", '" + getDay() + "', '" + getTime() + "', '" + getSemester() + "', " + getYear() + ", " + tmp.getLIN() + ", '" + getDateOfSession() + "', '" + reason + "')";
     }
 }
