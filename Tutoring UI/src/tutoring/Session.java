@@ -1,9 +1,7 @@
 package tutoring;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.sql.*;
 
 /**
@@ -58,6 +56,10 @@ public class Session extends Section {
         return missing;
     }
 
+    public void setDateOfSession(Date date) {
+        this.dateOfSession = date;
+    }
+
     /**
      * Updates the data base for attending students and adds the student to the
      * array list of attending students.
@@ -88,10 +90,6 @@ public class Session extends Section {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public void setDateOfSession(Date date) {
-        this.dateOfSession = date;
     }
 
     /*

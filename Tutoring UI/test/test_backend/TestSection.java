@@ -55,70 +55,54 @@ public class TestSection {
     public void tearDown() {
     }
 
-    @Test
     /**
-     * Testing to make sure Connection is successful
+     * This tests if the user tries to pass in a non-existent section. A foreign
+     * key should be violated
      */
-    public void testConnection() {
-        Section s = new Section("MATH", 205, "Mon", "4:00", "Fall", 2018);
+    @Test
+    public void testSectionNotExists() {
+        Section s = new Section("AAA", 205, "Mon", "4:00", "Fall", 2018);
     }
 
     /**
-     * This method tests if the section is properly loaded if it's not already
-     * in the DB. Verified by checking DB after method call.
+     * This method tests if the section is properly loaded by checking DB after method call.
      */
     @Test
-    public void testLoadSectionNotYetDB() {
+    public void testLoadSectionValid() {
         Section s = new Section("MATH", 205, "Mon", "4:00", "Fall", 2018);
+        Section s1 = new Section("CHM", 30, "Tues", "6:00", "Fall", 2018);
     }
-
+    
     /**
-     * Tests if everything is still fine in the DB if the section is already
-     * loaded
+     * Should fail if test is a success. Attempts insert of invalid sections
      */
     @Test
-    public void testLoadSectionAlreadyInDB() {
-        Section s = new Section("MATH", 205, "Mon", "4:00", "Fall", 2018);
+    public void testLoadSectionsInvalid()
+    {
+        Section s = new Section("MATH", 208, "Mon", "4:00", "Fall", 2018);
+        Section s1 = new Section("MATHH", 205, "Mon", "4:00", "Fall", 2018);
     }
+    
 
     /**
-     * This method tests if a student is successfully loaded into the DB and
+     * This method tests if 1 or more students is successfully loaded into the DB and
      * ArrayList of students
      */
     @Test
-    public void testInsertStudent() {
+    public void testInsertStudents() {
         Section s = new Section("MATH", 205, "Mon", "4:00", "Fall", 2018); //should load the section
+    //    Section s2 = new Section("ACCT", 151, "Mon", "6:00", "Fall", 2018);
         int prevSize = s.getStudents().size();
         Student student = new Student("Samuel", "Chebruch", "sac320@lehigh.edu", 112233221, false);
+        Student student2 = new Student("Mike", "Smith", "mike.smith@lehigh.edu", 234543212, false);
         s.insertNewStudent(student);
+        s.insertNewStudent(student2);
         int newSize = s.getStudents().size();
-        assertEquals(prevSize + 1, newSize);
-    }
-
-    //@Test
-    /**
-     * helper method to get number of instances of a relation. used for various
-     * tests
-     */
-    public int getNumInstances(String tableName) {
-        //connect to DB
-        tableName = "CLASS";
-        String rows = "select count(*) as TOTAL from " + tableName;
-        ResultSet r = null;
-        int numInstances = 0;
-        try {
-            r = s.executeQuery(rows);
-            r.next();
-            numInstances = r.getInt("TOTAL");
-            System.out.println(numInstances);
-        } catch (SQLException e) {
-        }
-        assertEquals(Integer.parseInt(rows), 45);
-        return Integer.parseInt(rows);
+        assertEquals(prevSize + 2, newSize);
     }
 
     /**
-     * Tests the skip count for a student not currently in the DB. Should return
+     * Tests the skip count for a student not currently in the DB. Should return 0
      *
      */
     @Test
@@ -147,6 +131,7 @@ public class TestSection {
     public void testGetSkipCountGreaterThanZero() {
         Section s = new Section("MATH", 205, "Mon", "4:00", "Fall", 2018);
         Student student = new Student("Sam", "Chebruch", "schebruch@gmail.com", 112233221, false);
+        s.insertNewStudent(student);
         assertEquals(s.getSkipCount(student), 2);
     }
 
@@ -169,13 +154,16 @@ public class TestSection {
         }
     }
 
+    /**
+     * tests to make sure the array list of students is cleared, and the database of students is cleared (that's tested
+     * by inspection)
+     */
     @Test
     public void testClearStudents() {
-        Student student = new Student("Sam", "Chebruch", "schebruch@gmail.com", 112233221, false);
         Section s = new Section("MATH", 205, "Mon", "4:00", "Fall", 2018);
         s.clearStudents();
         assertEquals(s.getStudents().size(), 0);
-        
+
     }
 
 }

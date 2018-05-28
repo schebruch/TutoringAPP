@@ -34,27 +34,28 @@ public class Section {
      */
     public Section(String subj, int course_num, String day, String time, String semester, int year) {
         try {
-            Class.forName("org.sqlite.JDBC");
+            //  Class.forName("org.sqlite.JDBC");
             con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
             con.createStatement().execute("PRAGMA foreign_keys = ON");
             s = con.createStatement();
-            //   s.executeQuery("PRAGMA foreign_keys = ON");
             System.out.println("Connection successful");
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Could not connect");
             System.exit(0);
         }
+        assert (getSubjects().contains(subj)); //ensuring that a valid subject was passed in
         this.subj = subj;
+        assert (getCourseNums().contains(course_num));
         this.course_num = course_num;
         this.day = day;
         this.time = time;
         this.semester = semester;
         this.year = year;
-        loadStudents(); //loads the students already in this section into the students ArrayList
         loadSection(); //inserts the section into the DB if it's not already loaded
-
+        loadStudents(); //loads the students already in this section into the students ArrayList
     }
 
+    //may be useless
     public Section(String name, String day, String time, ArrayList<Student> students) {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -108,15 +109,27 @@ public class Section {
      * students
      */
     public void clearStudents() {
-        String deleteStudents = "delete from ENROLLED_IN where " + concatPKOfSection();
+        String deleteEnrolledIn = "delete from ENROLLED_IN where " + concatPKOfSection();
+        String deleteStudents = null;
         try {
-            s.executeUpdate(deleteStudents);
+            s.executeUpdate(deleteEnrolledIn);
+            for (int i = 0; i < getStudents().size(); i++) {
+                Student current = getStudents().get(i);
+                deleteStudents = "delete from STUDENT where LIN = " + current.getLIN();
+                s.executeUpdate(deleteStudents);
+            }
             students.clear();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * gets the skip count of
+     *
+     * @param student
+     * @return the skip count of student
+     */
     public int getSkipCount(Student student) {
         String q = "select skip_count from ENROLLED_IN where LIN = " + student.getLIN() + " and " + concatPKOfSection();
         try {
@@ -127,7 +140,7 @@ public class Section {
             } else {
                 return r.getInt("skip_count");
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
@@ -162,13 +175,15 @@ public class Section {
      * section (and the DB)
      */
     public void removeStudent(Student toRemove) {
-        String removeQuery = "delete from ENROLLED_IN where LIN = " + toRemove.getLIN() + " and " + concatPKOfSection();
+        String removeFromEnrolled = "delete from ENROLLED_IN where LIN = " + toRemove.getLIN() + " and " + concatPKOfSection();
+        String removeFromStudent = "delete from STUDENT where LIN = " + toRemove.getLIN();
         try {
-            s.executeUpdate(removeQuery);
+            s.executeUpdate(removeFromEnrolled);
+            s.executeUpdate(removeFromStudent);
             students.remove(toRemove);
             System.out.println("Remove successful");
         } catch (SQLException e) {
-            e.printStackTrace();
+            //  e.printStackTrace();
         }
     }
 
@@ -194,7 +209,7 @@ public class Section {
         try {
             s.executeUpdate(insertStudent);
         } catch (SQLException e) {
-            //ok if the STUDENT already exists in another section
+            //  assert (e instanceof SQLIntegrityConstraintViolationException);
         }
         //Update ENROLLED_IN
         String insertEnrolledIn = "insert into ENROLLED_IN values('" + subj + "', " + course_num + ", '" + day + "', '" + time + "', '" + semester + "', " + year + ", " + tmp.getLIN() + ", 0)";
@@ -202,8 +217,22 @@ public class Section {
             s.executeUpdate(insertEnrolledIn);
             students.add(tmp);
         } catch (SQLException e) {
+            // assert(e instanceof SQLIntegrityConstraintViolationException);
         }
 
+    }
+
+    /**
+     * Tests if 2 sections are concurrent, meaning they have the same
+     * year, semester, day, and time
+     * @param section
+     * @return true if 2 sections are concurrent
+     */
+    
+    //will put this in Tutor later for a list of sections. This doesn't belong here
+    private boolean concurrent(Section section) {
+        
+        return section.getYear() == this.getYear() && section.getSemester().equals(this.getSemester()) && section.getDay().equals(this.getDay()) && section.getTime().equals(this.getTime());  
     }
 
     /**
@@ -230,17 +259,18 @@ public class Section {
      */
     private void loadStudents() {
         //gets LINs of students in this section
-        String LINsQuery = "select LIN from ENROLLED_IN where " + concatPKOfSection();
+        String LINsQuery = "select * from ENROLLED_IN where " + concatPKOfSection();
         // String LINsQuery = "select LIN from ENROLLED_IN where subj_name = '" + subj + "' and course_num = " + course_num + " and Day_of_Week = '" + day + "' and time_held = '" + time + "' and semester = '" + semester + "' and year = " + year;
         ResultSet LINResult = null;
         ResultSet studentResult = null;
         try {
             LINResult = s.executeQuery(LINsQuery);
+            Statement s2 = con.createStatement();
             while (LINResult.next()) {
                 int LIN = LINResult.getInt("LIN");
                 //gets the student with this LIN from DB
                 String studentQuery = "select* from STUDENT where LIN = " + LIN;
-                studentResult = s.executeQuery(studentQuery);
+                studentResult = s2.executeQuery(studentQuery);
                 //add a student object for each student in the ResultSet
                 while (studentResult.next()) {
                     String first = studentResult.getString("first_name");
@@ -258,7 +288,6 @@ public class Section {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -271,10 +300,49 @@ public class Section {
         try {
             s.executeUpdate(q);
         } catch (SQLException e) {
-            if (e.getErrorCode() == 19) {
-                System.out.println("This section is already loaded");
-                //this is ok if the section is already in the DB                
-            }
+            // assert (e instanceof SQLIntegrityConstraintViolationException);
+
+            //this is ok if the section is already in the DB                
+            //e.printStackTrace();
         }
+    }
+
+    /**
+     * Helps test for foreign key violations
+     *
+     * @return a list of subjects
+     */
+    private ArrayList<String> getSubjects() {
+        ArrayList<String> subjects = new ArrayList<>();
+        String subjectQuery = "select subj_name from SUBJECT";
+        ResultSet r = null;
+        try {
+            r = s.executeQuery(subjectQuery);
+            while (r.next()) {
+                subjects.add(r.getString("subj_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return subjects;
+    }
+
+    /**
+     * 
+     * @return course numbers associated with this.subj
+     */
+    private ArrayList<Integer> getCourseNums() {
+        ArrayList<Integer> course_nums = new ArrayList<>();
+        String subjectQuery = "select course_num from CLASS where subj_name = '" + subj + "'";
+        ResultSet r = null;
+        try {
+            r = s.executeQuery(subjectQuery);
+            while (r.next()) {
+                course_nums.add(r.getInt("course_num"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return course_nums;
     }
 }
