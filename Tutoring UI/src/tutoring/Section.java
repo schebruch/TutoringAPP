@@ -17,7 +17,7 @@ public class Section {
     protected String time; //time that section is offered
     protected String semester; //fall or spring
     protected int year;
-    protected static Connection con;
+    protected static Connection con = Tutor.getConnection();
     protected static Statement s;
 
     /**
@@ -35,10 +35,9 @@ public class Section {
     public Section(String subj, int course_num, String day, String time, String semester, int year) {
         try {
             //  Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
-            con.createStatement().execute("PRAGMA foreign_keys = ON");
+         //   con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
+           // con.createStatement().execute("PRAGMA foreign_keys = ON");
             s = con.createStatement();
-            System.out.println("Connection successful");
         } catch (SQLException e) {
             System.out.println("Could not connect");
             System.exit(0);
@@ -172,13 +171,14 @@ public class Section {
     public void removeStudent(Student toRemove) {
         String removeFromEnrolled = "delete from ENROLLED_IN where LIN = " + toRemove.getLIN() + " and " + concatPKOfSection();
         String removeFromStudent = "delete from STUDENT where LIN = " + toRemove.getLIN();
+        System.out.println(removeFromEnrolled);
         try {
             s.executeUpdate(removeFromEnrolled);
-            s.executeUpdate(removeFromStudent);
+           // s.executeUpdate(removeFromStudent);
             students.remove(toRemove);
             System.out.println("Remove successful");
         } catch (SQLException e) {
-            //  e.printStackTrace();
+              e.printStackTrace();
         }
     }
 
@@ -204,7 +204,7 @@ public class Section {
         try {
             s.executeUpdate(insertStudent);
         } catch (SQLException e) {
-            //  assert (e instanceof SQLIntegrityConstraintViolationException);
+            e.printStackTrace();
         }
         //Update ENROLLED_IN
         String insertEnrolledIn = "insert into ENROLLED_IN values('" + subj + "', " + course_num + ", '" + day + "', '" + time + "', '" + semester + "', " + year + ", " + tmp.getLIN() + ", 0)";
@@ -212,7 +212,7 @@ public class Section {
             s.executeUpdate(insertEnrolledIn);
             students.add(tmp);
         } catch (SQLException e) {
-            // assert(e instanceof SQLIntegrityConstraintViolationException);
+            e.printStackTrace();
         }
 
     }
@@ -296,7 +296,6 @@ public class Section {
             s.executeUpdate(q);
         } catch (SQLException e) {
             // assert (e instanceof SQLIntegrityConstraintViolationException);
-
             //this is ok if the section is already in the DB                
             //e.printStackTrace();
         }

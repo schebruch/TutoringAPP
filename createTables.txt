@@ -10,5 +10,109 @@ CREATE TABLE `ATTENDS` (
 	`LIN`	INTEGER,
 	`DATE_ATTENDED`	TEXT NOT NULL,
 	PRIMARY KEY(subj_name,course_num,Day_of_Week,time_held,semester,year,LIN),
-	FOREIGN KEY(`LIN`) REFERENCES `STUDENT` ( 'LIN' )
+	FOREIGN KEY(`LIN`) REFERENCES `STUDENT` ( 'LIN' ) ON DELETE CASCADE,
+	FOREIGN KEY('SUBJ_NAME', 'COURSE_NUM', 'Day_of_Week', 'time_held', 'semester', 'year') REFERENCES SECTION('SUBJ_NAME', 'COURSE_NUM', 'Day_of_Week', 'time_held', 'semester', 'year') ON DELETE CASCADE
+);
+
+
+Skips:
+
+CREATE TABLE `SKIPS` (
+	`subj_name`	TEXT NOT NULL,
+	`course_num`	INTEGER,
+	`Day_of_Week`	TEXT NOT NULL,
+	`time_held`	TEXT NOT NULL,
+	`semester`	TEXT NOT NULL,
+	`year`	INTEGER,
+	`LIN`	INTEGER,
+	`DATE_SKIPPED`	TEXT NOT NULL,
+	`Reason`	TEXT DEFAULT 'N/A',
+	PRIMARY KEY(subj_name,course_num,Day_of_Week,time_held,semester,year,LIN),
+	FOREIGN KEY(`LIN`) REFERENCES `STUDENT` ( 'LIN' ) ON DELETE CASCADE,
+	FOREIGN KEY('SUBJ_NAME', 'COURSE_NUM', 'Day_of_Week', 'time_held', 'semester', 'year') REFERENCES SECTION('SUBJ_NAME', 'COURSE_NUM', 'Day_of_Week', 'time_held', 'semester', 'year') ON DELETE CASCADE
+
+);
+
+
+Class:
+
+CREATE TABLE "CLASS" (
+	`course_num`	INTEGER,
+	`subj_name`	TEXT,
+	PRIMARY KEY(course_num,subj_name),
+	FOREIGN KEY(`subj_name`) REFERENCES `SUBJECT` ( `subj_name` ) on delete cascade
+);
+
+
+ENROLLED_IN:
+
+CREATE TABLE `ENROLLED_IN` (
+	`subj_name`	TEXT NOT NULL,
+	`course_num`	INTEGER,
+	`Day_of_Week`	TEXT NOT NULL,
+	`time_held`	TEXT NOT NULL,
+	`semester`	TEXT NOT NULL,
+	`year`	INTEGER,
+	`LIN`	INTEGER,
+	`skip_count`	INTEGER DEFAULT 0 CHECK(skip_count >= 0),
+	PRIMARY KEY(subj_name,course_num,Day_of_Week,time_held,semester,year,LIN),
+	FOREIGN KEY(`LIN`) REFERENCES STUDENT on delete cascade,
+	FOREIGN KEY('subj_name', 'course_num', 'Day_of_Week', 'time_held', 'semester', 'year') REFERENCES SECTION on delete cascade
+);
+
+
+INSTRUCTS:
+
+CREATE TABLE `INSTRUCTS` (
+	`subj_name`	TEXT NOT NULL,
+	`course_num`	INTEGER,
+	`Day_of_Week`	TEXT NOT NULL,
+	`time_held`	TEXT NOT NULL,
+	`semester`	TEXT NOT NULL,
+	`year`	INTEGER,
+	`LIN`	INTEGER,
+	`date_held`	TEXT NOT NULL,
+	PRIMARY KEY(subj_name,course_num,Day_of_Week,time_held,semester,year),
+	FOREIGN KEY(`LIN`) REFERENCES `TUTOR`,
+	FOREIGN KEY('subj_name', 'course_num', 'Day_of_Week', 'time_held', 'semester', 'year') REFERENCES SECTION
+);
+
+SECTION:
+
+CREATE TABLE `SECTION` (
+	`subj_name`	TEXT NOT NULL,
+	`course_num`	INTEGER,
+	`Day_of_Week`	TEXT NOT NULL,
+	`time_held`	TEXT NOT NULL,
+	`semester`	TEXT NOT NULL,
+	`year`	INTEGER,
+	PRIMARY KEY(`subj_name`,`course_num`, 'Day_of_Week', 'time_held', 'semester', 'year'),
+	FOREIGN KEY(`course_num`, 'subj_name') REFERENCES 'CLASS' on delete cascade
+);
+
+STUDENT:
+
+CREATE TABLE `STUDENT` (
+	`LIN`	INTEGER,
+	`first_name`	TEXT NOT NULL,
+	`last_name`	TEXT NOT NULL,
+	`email`	TEXT NOT NULL,
+	`athlete_status`	TEXT NOT NULL,
+	PRIMARY KEY(LIN)
+);
+
+
+SUBJECT:
+
+CREATE TABLE `SUBJECT` (
+	`subj_name`	TEXT NOT NULL,
+	PRIMARY KEY(`subj_name`)
+);
+
+TUTOR:
+
+CREATE TABLE `TUTOR` (
+	`LIN`	INTEGER,
+	`tutor_name`	TEXT NOT NULL,
+	PRIMARY KEY(`LIN`)
 );

@@ -12,7 +12,7 @@ import java.sql.*;
  */
 public class Session extends Section {
 
-    private Date dateOfSession;
+    private String dateOfSession;
     private ArrayList<Student> attended = new ArrayList<>();
     private ArrayList<Student> missing = new ArrayList<>();
     private ArrayList<String> reasons = new ArrayList<>();
@@ -29,7 +29,7 @@ public class Session extends Section {
      * @param section references a section that this is a session of
      * @param dateOfSession references the date of the session
      */
-    public Session(Section section, Date dateOfSession) {
+    public Session(Section section, String dateOfSession) {
         super(section.getSubj(), section.getCourseNum(), section.getDay(), section.getTime(), section.getSemester(), section.getYear());
         this.dateOfSession = dateOfSession;
         String tutorQuery = "select* from TUTOR";
@@ -38,13 +38,15 @@ public class Session extends Section {
             r.next();
             Tutor t = new Tutor(r.getString("tutor_name"), r.getInt("LIN"));
             loadInstructs(t);
+            loadAttends();
+            loadMissing();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
     }
 
-    public Date getDateOfSession() {
+    public String getDateOfSession() {
         return dateOfSession;
     }
 
@@ -56,7 +58,7 @@ public class Session extends Section {
         return missing;
     }
 
-    public void setDateOfSession(Date date) {
+    public void setDateOfSession(String date) {
         this.dateOfSession = date;
     }
 
@@ -120,7 +122,9 @@ public class Session extends Section {
         String update = "delete from ATTENDS where LIN = " + student.getLIN();
         try {
             s.executeUpdate(update);
+            attended.remove(student);
         } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -134,12 +138,10 @@ public class Session extends Section {
         String skippedQuery = "select* from SKIPS where LIN = " + student.getLIN();
         boolean lowerSkipCount = false;
         try {
-            
             ResultSet r = s.executeQuery(skippedQuery);
             r.next();
-            String reason = r.getString("reason");
-            if(reason.equalsIgnoreCase("NA"))
-            {
+            String reason = r.getString("Reason");
+            if (reason.equalsIgnoreCase("NA")) {
                 lowerSkipCount = true;
             }
             Statement s2 = con.createStatement();
@@ -147,16 +149,15 @@ public class Session extends Section {
             String deleteSkipped = "delete from SKIPS where LIN = " + student.getLIN();
             s2.executeUpdate(deleteSkipped);
             String skipDecrement = null;
-            if(lowerSkipCount)
-            {
+            if (lowerSkipCount) {
                 skipDecrement = "update ENROLLED_IN set skip_count = " + (getSkipCount(student) - 1) + " where LIN = " + student.getLIN();
                 s3.executeUpdate(skipDecrement);
             }
             s2.close();
             s3.close();
+            missing.remove(student);
 
-        }catch(SQLException e)
-        {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -231,6 +232,64 @@ public class Session extends Section {
             s.executeUpdate(instructsUpdate);
         } catch (SQLException e) {
             //  e.printStackTrace();
+        }
+    }
+
+    /**
+     * Loads the list of attending students, done at construction
+     */
+    private void loadAttends() {
+        ResultSet r = null;
+        String attendsQuery = "select* from ATTENDS natural join STUDENT where time_held = '" + getTime() + "' and DATE_ATTENDED = '" + getDateOfSession() + "' and year = " + getYear() + " and semester = '" + getSemester() +"'";
+        try {
+            r = s.executeQuery(attendsQuery);
+            while (r.next()) {
+                if (!Student.getAthleteStatus(r.getInt("LIN"))) {
+                    Student tmp = new Student(r.getString("first_name"), r.getString("last_name"), r.getString("email"), r.getInt("LIN"), false);
+                    if (!attended.contains(tmp)) {
+                        attended.add(tmp);
+                    }
+                } else {
+                    Student tmp = new Student(r.getString("first_name"), r.getString("last_name"), r.getString("email"), r.getInt("LIN"), true);
+                    if (!attended.contains(tmp)) {
+                        attended.add(tmp);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+
+        }
+    }
+
+    /**
+     * Loads the list of missing students and reasons, done at construction Does
+     * not update skip count, this is done when the tutor takes attendance
+     */
+    private void loadMissing() {
+        ResultSet r = null;
+        String missingQuery = "select* from SKIPS natural join STUDENT where time_held = '" + getTime() + "' and DATE_SKIPPED = '" + getDateOfSession() + "' and year = " + getYear() + " and semester = '" + getSemester() + "'";
+        try {
+            r = s.executeQuery(missingQuery);
+            while (r.next()) {
+                String reason = r.getString("Reason");
+                if (!Student.getAthleteStatus(r.getInt("LIN"))) {
+                    Student tmp = new Student(r.getString("first_name"), r.getString("last_name"), r.getString("email"), r.getInt("LIN"), false);
+                    if (!missing.contains(tmp)) {
+                        
+                        missing.add(tmp);
+                        reasons.add(reason);
+                    }
+
+                } else {
+                    Student tmp = new Student(r.getString("first_name"), r.getString("last_name"), r.getString("email"), r.getInt("LIN"), true);
+                    if (!missing.contains(tmp)) {
+                        missing.add(tmp);
+                        reasons.add(reason);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

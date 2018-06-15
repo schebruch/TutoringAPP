@@ -11,23 +11,18 @@ public class Tutor {
     private String name;
     private ArrayList<Section> sections = new ArrayList<>();
     private int LIN;
-    private static Connection con;
+    public static Connection con = establishConnection();
     private static Statement s;
 
     public Tutor(String name, int LIN) {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
-            s = con.createStatement();
-            System.out.println("Connection successful");
-        } catch (Exception e) {
-            System.out.println("Could not connect");
-            System.exit(0);
-        }
 
-        assert(getCharactersLIN(LIN) == 9);
+        try{
+            s = con.createStatement();
+        }catch(SQLException e)
+        {}
+        assert (getCharactersLIN(LIN) == 9);
         this.LIN = LIN;
-        assert(name.matches("[A-Z][a-z]+[ ][A-Z][a-z]+"));
+        assert (name.matches("[A-Z][a-z]+[ ][A-Z][a-z]+"));
         this.name = name;
         String q = "insert into TUTOR values(" + LIN + ", '" + name + "')";
         try {
@@ -36,24 +31,40 @@ public class Tutor {
             //ok if tutor already created
         }
     }
-    
-    public int getLIN()
-    {
+
+    public int getLIN() {
         return LIN;
     }
-    
-    public String getName()
-    {
+
+    public String getName() {
         return name;
     }
     
-        
+    public static Connection getConnection()
+    {
+        return con;
+    }
+
+    private static Connection establishConnection() {
+        Connection con = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            con = DriverManager.getConnection("jdbc:sqlite:Tutoring.db");
+            con.createStatement().execute("PRAGMA foreign_keys = ON");
+            System.out.println("Connection successful");
+        } catch (ClassNotFoundException | SQLException e) {
+            System.out.println("Could not connect");
+            System.exit(0);
+        }
+        return con;
+    }
+
     /**
      * Returns the number of characters in a LIN number.
+     *
      * @return
      */
-    private int getCharactersLIN(int LIN)
-    {
+    private int getCharactersLIN(int LIN) {
         String LINString = Integer.toString(LIN);
         return LINString.length();
     }
