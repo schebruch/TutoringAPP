@@ -1,3 +1,6 @@
+//MUST LATER FIGURE OUT HOW TO ASSERT THAT NO 2 SECTIONS CAN BE CONCURRENT
+
+
 package tutoring;
 
 import java.util.ArrayList;
@@ -112,11 +115,6 @@ public class Section {
         String deleteStudents = null;
         try {
             s.executeUpdate(deleteEnrolledIn);
-            for (int i = 0; i < getStudents().size(); i++) {
-                Student current = getStudents().get(i);
-                deleteStudents = "delete from STUDENT where LIN = " + current.getLIN();
-                s.executeUpdate(deleteStudents);
-            }
             students.clear();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -153,7 +151,7 @@ public class Section {
     public void setSkipCount(Student student, int skipCount)
     {
         assert(skipCount >= 0);
-        String updateSkipCount = "update ENROLLED_IN set skip_count = " + skipCount + " where LIN = " + student.getLIN();
+        String updateSkipCount = "update ENROLLED_IN set skip_count = " + skipCount + " where LIN = " + student.getLIN() + " and " + concatPKOfSection();
         try
         {
             s.executeUpdate(updateSkipCount);
@@ -170,8 +168,7 @@ public class Section {
      */
     public void removeStudent(Student toRemove) {
         String removeFromEnrolled = "delete from ENROLLED_IN where LIN = " + toRemove.getLIN() + " and " + concatPKOfSection();
-        String removeFromStudent = "delete from STUDENT where LIN = " + toRemove.getLIN();
-        System.out.println(removeFromEnrolled);
+       // String removeFromStudent = "delete from STUDENT where LIN = " + toRemove.getLIN();
         try {
             s.executeUpdate(removeFromEnrolled);
            // s.executeUpdate(removeFromStudent);
@@ -245,7 +242,7 @@ public class Section {
      * @return the String of the query that identifies this section. Should be
      * called after the "where" clause in the original query
      */
-    private String concatPKOfSection() {
+    protected String concatPKOfSection() {
         return "subj_name = '" + subj + "' and course_num = " + course_num + " and Day_of_Week = '" + day + "' and time_held = '" + time + "' and semester = '" + semester + "' and year = " + year;
     }
 

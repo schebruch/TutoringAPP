@@ -70,7 +70,7 @@ public class Session extends Section {
      */
     public void markAttended(Student student) {
         try {
-            String attendanceQuery = getAttendanceString("ATTENDS", student, null);
+            String attendanceQuery = getAttendanceString("ATTENDS", student, null); //the string to insert into ATTENDS. Reason is thus null.
             s.executeUpdate(attendanceQuery);
 
         } catch (SQLException e) {
@@ -84,7 +84,7 @@ public class Session extends Section {
     }
 
     /**
-     * Allows the tutor to mark someone as absent Updates the skip count for
+     * Allows the tutor to mark someone as absent. Updates the skip count for
      * that student if the reason is NA
      *
      * @param student refers to the student we are marking as absent
@@ -93,12 +93,12 @@ public class Session extends Section {
      */
     public void markSkipped(Student student, String reason) {
         try {
-            String attendanceQuery = getAttendanceString("SKIPS", student, reason);
+            String attendanceQuery = getAttendanceString("SKIPS", student, reason); //insert statement 
             s.executeUpdate(attendanceQuery);
             if (reason.equalsIgnoreCase("NA")) {
 
                 int skipCountUpdate = 1 + getSkipCount(student);
-                String skipUpdate = "update ENROLLED_IN set skip_count = " + skipCountUpdate + " where LIN = " + student.getLIN();
+                String skipUpdate = "update ENROLLED_IN set skip_count = " + skipCountUpdate + " where LIN = " + student.getLIN() + " and " + concatPKOfSection();
                 s.executeUpdate(skipUpdate);
             }
         } catch (SQLException e) {
@@ -119,11 +119,28 @@ public class Session extends Section {
      * @param student from list of attending students
      */
     public void removeAttended(Student student) {
-        String update = "delete from ATTENDS where LIN = " + student.getLIN();
+        String update = "delete from ATTENDS where LIN = " + student.getLIN() + " and date_attended = '" + getDateOfSession() + "' and " + concatPKOfSection();
         try {
             s.executeUpdate(update);
-            attended.remove(student);
+            if (attended.contains(student)) {
+                
+                attended.remove(student);
+            }
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Clears the list of attending students from DB and lists for this section
+     */
+    public void clearAttended() {
+        attended.clear();
+        try
+        {
+            s.executeUpdate("delete from ATTENDS where date_attended = '" + getDateOfSession() + "' and " + concatPKOfSection());
+        }catch(SQLException e)
+        {
             e.printStackTrace();
         }
     }
@@ -135,22 +152,22 @@ public class Session extends Section {
      * skip count if the reason was NA
      */
     public void removeSkipped(Student student) {
-        String skippedQuery = "select* from SKIPS where LIN = " + student.getLIN();
+        String skippedQuery = "select* from SKIPS where LIN = " + student.getLIN() + " and date_skipped = '" + getDateOfSession() + "' and " + concatPKOfSection();
         boolean lowerSkipCount = false;
         try {
             ResultSet r = s.executeQuery(skippedQuery);
             r.next();
             String reason = r.getString("Reason");
-            if (reason.equalsIgnoreCase("NA")) {
+            if (reason.equalsIgnoreCase("NA")) {//we must update the skip count if we are removing a skipped student for an 'NA' reason
                 lowerSkipCount = true;
             }
             Statement s2 = con.createStatement();
             Statement s3 = con.createStatement();
-            String deleteSkipped = "delete from SKIPS where LIN = " + student.getLIN();
+            String deleteSkipped = "delete from SKIPS where LIN = " + student.getLIN() + " and date_skipped = '" + getDateOfSession() + "' and " + concatPKOfSection();
             s2.executeUpdate(deleteSkipped);
             String skipDecrement = null;
-            if (lowerSkipCount) {
-                skipDecrement = "update ENROLLED_IN set skip_count = " + (getSkipCount(student) - 1) + " where LIN = " + student.getLIN();
+            if (lowerSkipCount) { //if we must lower the skip count
+                skipDecrement = "update ENROLLED_IN set skip_count = " + (getSkipCount(student) - 1) + " where LIN = " + student.getLIN() + " and " + concatPKOfSection();
                 s3.executeUpdate(skipDecrement);
             }
             s2.close();
@@ -240,7 +257,7 @@ public class Session extends Section {
      */
     private void loadAttends() {
         ResultSet r = null;
-        String attendsQuery = "select* from ATTENDS natural join STUDENT where time_held = '" + getTime() + "' and DATE_ATTENDED = '" + getDateOfSession() + "' and year = " + getYear() + " and semester = '" + getSemester() +"'";
+        String attendsQuery = "select* from ATTENDS natural join STUDENT where time_held = '" + getTime() + "' and DATE_ATTENDED = '" + getDateOfSession() + "' and year = " + getYear() + " and semester = '" + getSemester() + "'";
         try {
             r = s.executeQuery(attendsQuery);
             while (r.next()) {
@@ -275,7 +292,7 @@ public class Session extends Section {
                 if (!Student.getAthleteStatus(r.getInt("LIN"))) {
                     Student tmp = new Student(r.getString("first_name"), r.getString("last_name"), r.getString("email"), r.getInt("LIN"), false);
                     if (!missing.contains(tmp)) {
-                        
+
                         missing.add(tmp);
                         reasons.add(reason);
                     }
